@@ -139,7 +139,7 @@ class OrderService(metaclass=Singleton):
         return _order_dto
     
 
-    def update(self, order_id: str, order: OrderDTO, images: List[UploadFile], files: List[UploadFile], username: str):
+    def update(self, order_id: str, order: OrderDTO, images: List[UploadFile], username: str):
         _timestamp_now = TimeHelper.get_timestamp_now(level=MILISECOND)
 
         _order_entity = OrderEntity(**order.__dict__)
@@ -167,14 +167,6 @@ class OrderService(metaclass=Singleton):
             AESHelper.encrypt_image(image_bytes, encrypted_image_path)
             AESHelper.encrypt_image(thumb_bytes, encrypted_thumb_path)
             _order_entity.list_image_id.append(id_image)
-
-
-        for file in files:
-            file_bytes = file.file.read()
-            id_file = str(uuid.uuid4())
-            encrypted_file_path = f'./data/order/{id_file}.enc'
-            AESHelper.encrypt_image(file_bytes, encrypted_file_path)
-            _order_entity.list_file_id.append(File(name=file.filename, file_id=id_file))
 
         self.__order_repository.update(order_id=order_id, order_data=_order_entity)
 

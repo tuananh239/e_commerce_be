@@ -126,12 +126,11 @@ async def update(
     order_id: str = None,
     data: OrderUpdateDTO = Body(...),
     images: List[UploadFile] = Depends(ValidationHelper.validate_list_image),
-    files: List[UploadFile] = Depends(ValidationHelper.validate_list_pdf),
     user = Depends(validate_user_token)
 ):
     order_service.get_detail(order_id=order_id)
 
-    _result = order_service.update(order_id=order_id, order=data, images=images, files=files, username=user)
+    _result = order_service.update(order_id=order_id, order=data, images=images, username=user)
 
     return ResponseSuccess(
         path=request.url.path,
