@@ -28,8 +28,8 @@ def _get_user_keycloak(payload: dict):
     :param payload:
     :return:
     """
-    if 'preferred_username' in payload.keys():
-        return payload['preferred_username']
+    if 'email' in payload.keys():
+        return payload['email']
     else:
         raise AuthorizationException(
             message="Invalid token - Detail: 'preferred_username' not in payload."

@@ -35,10 +35,10 @@ class UserService(metaclass=Singleton):
         self.__user_repository = UserRepository()
 
     def create(self, user: UserCreateDTO, username):
-        _user_detail = self.__user_repository.get_detail_by_user(user=user.username)
+        _user_detail = self.__user_repository.get_detail_by_user(user=user.email)
 
         if _user_detail:
-            raise NotAllowedException(message=f'{user.username} đã tồn tại.')
+            raise NotAllowedException(message=f'{user.email} đã tồn tại.')
 
         _timestamp_now = TimeHelper.get_timestamp_now(level=MILISECOND)
 
@@ -143,7 +143,13 @@ class UserService(metaclass=Singleton):
 
         _payload = {
             'sub': 'user_id',
-            'preferred_username': user.username,
+            'email': getattr(_user_detail, 'email', ''),
+            'name': getattr(_user_detail, 'name', ''),
+            'phone_number': getattr(_user_detail, 'phone_number', ''),
+            'storage': getattr(_user_detail, 'storage', ''),
+            'province': getattr(_user_detail, 'province', ''),
+            'district': getattr(_user_detail, 'district', ''),
+            'address_detail': getattr(_user_detail, 'address_detail', ''),
             'role': _user_detail.role,
             'iat': datetime.datetime.utcnow(),
             'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1)

@@ -51,15 +51,17 @@ class OrderService(metaclass=Singleton):
             # Create the folder
             os.makedirs(folder_order_path)
 
-        image_bytes = image.file.read()
-        image_data = Image.open(BytesIO(image_bytes))
-        thumb_bytes = ImageHelper.resize_image(image=image_data)
-        id_image = str(uuid.uuid4())
-        id_thumb = id_image + "-thumb"
-        encrypted_image_path = f'./data/order/{id_image}.enc'
-        encrypted_thumb_path = f'./data/order/{id_thumb}.enc'
-        AESHelper.encrypt_image(image_bytes, encrypted_image_path)
-        AESHelper.encrypt_image(thumb_bytes, encrypted_thumb_path)
+        id_image = None
+        if image:
+            image_bytes = image.file.read()
+            image_data = Image.open(BytesIO(image_bytes))
+            thumb_bytes = ImageHelper.resize_image(image=image_data)
+            id_image = str(uuid.uuid4())
+            id_thumb = id_image + "-thumb"
+            encrypted_image_path = f'./data/order/{id_image}.enc'
+            encrypted_thumb_path = f'./data/order/{id_thumb}.enc'
+            AESHelper.encrypt_image(image_bytes, encrypted_image_path)
+            AESHelper.encrypt_image(thumb_bytes, encrypted_thumb_path)
 
         _order_entity = OrderEntity(
             **order.__dict__

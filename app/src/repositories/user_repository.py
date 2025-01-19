@@ -65,9 +65,9 @@ class UserRepository(BaseRepository, metaclass=Singleton):
 
     
     def __create_admin_user(self):
-        _response = self.__collection.find_one({'username': 'admin', "is_active": True})
+        _response = self.__collection.find_one({'email': 'admin', "is_active": True})
 
-        _user_entity = UserEntity(username='admin', password='Vietnam@2024', role='ADMIN', is_active=True)
+        _user_entity = UserEntity(email='admin', password='Vietnam@2024', role='ADMIN', is_active=True)
 
         if not _response:
             _response = self.__collection.insert_one(jsonable_encoder(_user_entity))
@@ -88,11 +88,11 @@ class UserRepository(BaseRepository, metaclass=Singleton):
 
     def get(self, sort=Sorting(), filter=Filtering(), pagination=Pagination(), search: str=""):
         _condition = {
-            'username': {'$ne': 'admin'},
+            'email': {'$ne': 'admin'},
             "is_active": True,
             **(filter.data),
             "$or": [
-                {"username": self._approximate_search(search)}
+                {"email": self._approximate_search(search)}
             ]
         }
 
@@ -135,7 +135,7 @@ class UserRepository(BaseRepository, metaclass=Singleton):
             "is_active": True,
             **(filter.data),
             "$or": [
-                {"username": self._approximate_search(search)}
+                {"email": self._approximate_search(search)}
             ]
         }
 
@@ -204,7 +204,7 @@ class UserRepository(BaseRepository, metaclass=Singleton):
     
 
     def get_detail_by_user(self, user: str):
-        _response = self.__collection.find_one({'username': user, "is_active": True})
+        _response = self.__collection.find_one({'email': user, "is_active": True})
 
         if _response:
             return UserEntity(**{**_response, "id": str(_response["_id"])})
@@ -213,7 +213,7 @@ class UserRepository(BaseRepository, metaclass=Singleton):
         
 
     def check_valid_user(self, user: UserEntity):
-        _response = self.__collection.find_one({'username': user.username, 'password': user.password, "is_active": True})
+        _response = self.__collection.find_one({'email': user.email, 'password': user.password, "is_active": True})
 
         if _response:
             return UserEntity(**{**_response, "id": str(_response["_id"])})

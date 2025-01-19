@@ -23,7 +23,7 @@ from app.libs.helpers.aes_helper import AESHelper
 from app.libs.helpers.validation_helper import ValidationHelper
 from app.src.commons.constants.constants import JWT_CONST
 from app.src.dependencies.auth_dependency import validate_user_token
-from app.src.models.dto.user_dto import UserCreateDTO, UserDTO, UserGetDTO, UserUpdateDTO
+from app.src.models.dto.user_dto import UserCreateDTO, UserDTO, UserGetDTO, UserLoginDTO, UserUpdateDTO
 from app.src.services.user_service import UserService
 
 # =================================================================================================================
@@ -104,7 +104,7 @@ async def create(
 @try_catch
 async def login(
     request: Request,
-    data: UserCreateDTO = Body(...)
+    data: UserLoginDTO = Body(...)
     # user = Depends(validate_user_token)
 ):
     _result = user_service.login(data)
