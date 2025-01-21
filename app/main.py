@@ -107,9 +107,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.src.commons.constants.constants import APP_CONST
 from app.src.controllers.user_controller import user_controller
-from app.src.controllers.decision_controller import decision_controller
-from app.src.controllers.petition_controller import petition_controller
-from app.src.controllers.commitment_controller import commitment_controller
+from app.src.controllers.config_controller import config_controller
 from app.src.controllers.order_controller import order_controller
 
 # ===========================================================================================
@@ -129,7 +127,8 @@ app.add_middleware(
 
 controllers = [
     order_controller,
-    user_controller
+    user_controller,
+    config_controller
 ]
 
 add_router(

@@ -26,6 +26,7 @@ from app.libs.helpers.time_helper import TimeHelper, MILISECOND
 
 from app.src.models.dto.order_dto import OrderCreateDTO, OrderDTO, OrderGetDTO
 from app.src.models.entity.order_entity import OrderEntity
+from app.src.repositories.config_repository import ConfigRepository
 from app.src.repositories.order_repository import OrderRepository
 
 # Declare Element =================================================================================================
@@ -39,6 +40,7 @@ class OrderService(metaclass=Singleton):
     def __init__(self) -> None:
         """"""
         self.__order_repository = OrderRepository()
+        self.__config_repository = ConfigRepository()
 
     def create(self, order: OrderCreateDTO, image: UploadFile, username: str):
         folder_data_path = './data'
@@ -109,6 +111,35 @@ class OrderService(metaclass=Singleton):
         )
 
         if _result:
+            _config_entity = self.__config_repository.get_latest()
+
+            for _order_entity in _result:
+                _order_entity.exchange_rate = _config_entity.exchange_rate
+
+                _total_cn_price = 0
+                for _product in _order_entity.products:
+                    _total_cn_price = _total_cn_price + _product.price
+
+                _total_vn_price = _total_cn_price*_config_entity.exchange_rate
+                
+                _order_fee_percent = 0
+                for _option in _config_entity.purchase_fee:
+                    if _total_vn_price:
+                        if _total_vn_price > _option.min and _total_vn_price <= _option.max:
+                            _order_fee_percent = _option.value
+                            break
+
+                _weight_fee = 0
+                for _option in _config_entity.weight:
+                    if _order_entity.weight:
+                        if _order_entity.weight > _option.min and _order_entity.weight <= _option.max:
+                            _weight_fee = _option.value
+                            break
+
+                _order_entity.order_fee_percent = _order_fee_percent
+                _order_entity.weight_rate = _weight_fee
+                _order_entity.weight_fee = _weight_fee*(_order_entity.weight if _order_entity.weight else 0)
+
             _result = [OrderDTO(**order.__dict__) for order in _result]
 
         _total_records = self.__order_repository.count_document(
@@ -128,6 +159,34 @@ class OrderService(metaclass=Singleton):
 
     def get_detail(self, order_id: str):
         _order_entity = self.__order_repository.get_detail(order_id=order_id)
+        _config_entity = self.__config_repository.get_latest()
+
+        _order_entity.exchange_rate = _config_entity.exchange_rate
+
+        _total_cn_price = 0
+        for _product in _order_entity.products:
+            _total_cn_price = _total_cn_price + _product.price
+
+        _total_vn_price = _total_cn_price*_config_entity.exchange_rate
+        
+        _order_fee_percent = 0
+        for _option in _config_entity.purchase_fee:
+            if _total_vn_price:
+                if _total_vn_price > _option.min and _total_vn_price <= _option.max:
+                    _order_fee_percent = _option.value
+                    break
+
+        _weight_fee = 0
+        for _option in _config_entity.weight:
+            if _order_entity.weight:
+                if _order_entity.weight > _option.min and _order_entity.weight <= _option.max:
+                    _weight_fee = _option.value
+                    break
+
+        _order_entity.order_fee_percent = _order_fee_percent
+        _order_entity.weight_rate = _weight_fee
+        _order_entity.weight_fee = _weight_fee*(_order_entity.weight if _order_entity.weight else 0)
+
 
         if _order_entity == None:
             raise NotFoundException(message='Không tìm thấy đơn xin cấp phép \'{order_id}\'.')

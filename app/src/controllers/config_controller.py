@@ -3,7 +3,7 @@
 # =================================================================================================================
 
 """
-    Định nghĩa và triển khai tất cả các API liên quan đến Order
+    Định nghĩa và triển khai tất cả các API liên quan đến Config
 """
 
 # =================================================================================================================
@@ -19,8 +19,8 @@ from app.libs.fastapi.response import ResponseSuccess
 from app.libs.helpers.aes_helper import AESHelper
 from app.libs.helpers.validation_helper import ValidationHelper
 from app.src.dependencies.auth_dependency import validate_user_token
-from app.src.models.dto.order_dto import OrderDTO, OrderCreateDTO, OrderUpdateDTO, OrderGetDTO
-from app.src.services.order_service import OrderService
+from app.src.models.dto.config_dto import ConfigDTO, ConfigCreateDTO, ConfigUpdateDTO, ConfigGetDTO
+from app.src.services.config_service import ConfigService
 
 # =================================================================================================================
 
@@ -28,25 +28,25 @@ from app.src.services.order_service import OrderService
 
 # Main ============================================================================================================
 
-order_router = get_router()
+config_router = get_router()
 
-order_controller = Controller(
-    router=order_router,
-    tags=["Order"]
+config_controller = Controller(
+    router=config_router,
+    tags=["Config"]
 )
 
-order_service = OrderService()
+config_service = ConfigService()
 
 # Implement API ===================================================================================================
 # API Get ---------------------------------------------------------------------------------------------------------
-@order_router.get(path="/order/")
+@config_router.get(path="/config/")
 @try_catch
 async def get_list(
     request: Request,
-    params: OrderGetDTO = Depends(),
+    params: ConfigGetDTO = Depends(),
     # user = Depends(validate_user_token)
 ):
-    _result, _pagination, _sort = order_service.get(params=params)
+    _result, _pagination, _sort = config_service.get(params=params)
 
     return ResponseSuccess(
         path=request.url.path,
@@ -56,15 +56,36 @@ async def get_list(
     )
 
 
+@config_router.get(path="/config/latest")
+@try_catch
+async def get_latest(
+    request: Request,
+    # user = Depends(validate_user_token)
+):
+    _params = ConfigGetDTO()
+    _params.sort = "desc"
+    _result, _pagination, _sort = config_service.get(params=_params)
+
+    _res = None
+    if len(_result) > 0:
+        _res = _result[0]
+
+
+    return ResponseSuccess(
+        path=request.url.path,
+        result=_res
+    )
+
+
 # API Get detail by transaction -----------------------------------------------------------------------------------
-@order_router.get(path="/order/{order_id}")
+@config_router.get(path="/config/{config_id}")
 @try_catch
 async def get_detail(
     request: Request,
-    order_id: str = None,
+    config_id: str = None,
     # user = Depends(validate_user_token)
 ):
-    _result = order_service.get_detail(order_id=order_id)
+    _result = config_service.get_detail(config_id=config_id)
 
     return ResponseSuccess(
         path=request.url.path,
@@ -72,17 +93,16 @@ async def get_detail(
     )
 
 # API Create ------------------------------------------------------------------------------------------------------
-@order_router.post(path="/order/")
+@config_router.post(path="/config/")
 @try_catch
 async def create(
     request: Request,
-    data: OrderCreateDTO = Body(...),
-    image: UploadFile = Depends(ValidationHelper.validate_image),
+    data: ConfigCreateDTO = Body(...),
     # user = Depends(validate_user_token)
     user = "user"
 ):
 
-    _result = order_service.create(order=data, image=image, username=user)
+    _result = config_service.create(config=data, username=user)
 
     return ResponseSuccess(
         path=request.url.path,
@@ -90,48 +110,19 @@ async def create(
     )
 
 
-@order_router.get(path="/order/{order_id}/image/{image_id}/{type_image}")
-@try_catch
-async def get_image_content(
-    request: Request,
-    order_id: str = None,
-    image_id: str = None,
-    type_image: str = 'original',
-    # user = Depends(validate_user_token)
-    user = "user"
-):
-    folder_path = './data/order'
-    
-    if type_image == "original":
-        with open(f'{folder_path}/{image_id}.enc', 'rb') as enc_file:
-            enc_data = enc_file.read()
-    if type_image == "thumbnail":
-        with open(f'{folder_path}/{image_id}-thumb.enc', 'rb') as enc_file:
-            enc_data = enc_file.read()
-
-    decrypted_data = AESHelper.decrypt_image(enc_data)
-
-    import io
-    return StreamingResponse(
-        io.BytesIO(decrypted_data),
-        media_type='image/png'
-    )
-
-
 #API Update ------------------------------------------------------------------------------------------------------
-@order_router.put(path="/order/{order_id}")
+@config_router.put(path="/config/{config_id}")
 @try_catch
 async def update(
     request: Request,
-    order_id: str = None,
-    data: OrderUpdateDTO = Body(...),
-    images: List[UploadFile] = Depends(ValidationHelper.validate_list_image),
+    config_id: str = None,
+    data: ConfigUpdateDTO = Body(...),
     # user = Depends(validate_user_token)
-    user="user"
+    user= "user"
 ):
-    order_service.get_detail(order_id=order_id)
+    config_service.get_detail(config_id=config_id)
 
-    _result = order_service.update(order_id=order_id, order=data, images=images, username=user)
+    _result = config_service.update(config_id=config_id, config=data, username=user)
 
     return ResponseSuccess(
         path=request.url.path,
@@ -140,17 +131,17 @@ async def update(
 
 
 #API Remove ------------------------------------------------------------------------------------------------------
-@order_router.delete(path="/order/{order_id}")
+@config_router.delete(path="/config/{config_id}")
 @try_catch
 async def remove(
     request: Request,
-    order_id: str = None,
+    config_id: str = None,
     # user = Depends(validate_user_token)
     user="user"
 ):
-    order_service.get_detail(order_id=order_id)
+    config_service.get_detail(config_id=config_id)
 
-    _result = order_service.remove(order_id=order_id)
+    _result = config_service.remove(config_id=config_id)
 
     return ResponseSuccess(
         path=request.url.path,

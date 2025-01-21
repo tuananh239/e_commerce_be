@@ -21,6 +21,7 @@ class UserCreateDTO(BaseModel):
     province: Optional[str]
     district: Optional[str]
     address_detail: Optional[str]
+    balance: Optional[float]
 
 
 class UserLoginDTO(BaseModel):
@@ -36,6 +37,7 @@ class UserUpdateDTO(BaseModel):
     province: Optional[str]
     district: Optional[str]
     address_detail: Optional[str]
+    balance: Optional[float]
 
 
 class UserDTO(BaseModel):
@@ -48,6 +50,7 @@ class UserDTO(BaseModel):
     province: Optional[str]
     district: Optional[str]
     address_detail: Optional[str]
+    balance: Optional[float]
     role: Optional[str]
     modified_by: Optional[str]
     modified_time: Optional[int]
