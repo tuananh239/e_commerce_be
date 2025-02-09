@@ -13,6 +13,7 @@ from starlette import status
 from fastapi import APIRouter, Depends, Request, Header, UploadFile
 from fastapi.param_functions import Body
 
+from app.libs.exception.exceptions import NotAllowedException
 from app.libs.fastapi.decorator import try_catch
 from app.libs.fastapi.route import Controller, get_router
 from app.libs.fastapi.response import ResponseSuccess
@@ -98,9 +99,10 @@ async def get_detail(
 async def create(
     request: Request,
     data: ConfigCreateDTO = Body(...),
-    # user = Depends(validate_user_token)
-    user = "user"
+    user = Depends(validate_user_token)
 ):
+    if user != 'admin':
+        raise NotAllowedException(message='Người dùng này không có quyền.')
 
     _result = config_service.create(config=data, username=user)
 
@@ -117,9 +119,11 @@ async def update(
     request: Request,
     config_id: str = None,
     data: ConfigUpdateDTO = Body(...),
-    # user = Depends(validate_user_token)
-    user= "user"
+    user = Depends(validate_user_token)
 ):
+    if user != 'admin':
+        raise NotAllowedException(message='Người dùng này không có quyền.')
+
     config_service.get_detail(config_id=config_id)
 
     _result = config_service.update(config_id=config_id, config=data, username=user)
@@ -136,9 +140,11 @@ async def update(
 async def remove(
     request: Request,
     config_id: str = None,
-    # user = Depends(validate_user_token)
-    user="user"
+    user = Depends(validate_user_token)
 ):
+    if user != 'admin':
+        raise NotAllowedException(message='Người dùng này không có quyền.')
+
     config_service.get_detail(config_id=config_id)
 
     _result = config_service.remove(config_id=config_id)

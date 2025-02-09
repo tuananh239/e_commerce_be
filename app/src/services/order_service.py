@@ -28,6 +28,7 @@ from app.src.models.dto.order_dto import OrderCreateDTO, OrderDTO, OrderGetDTO
 from app.src.models.entity.order_entity import OrderEntity
 from app.src.repositories.config_repository import ConfigRepository
 from app.src.repositories.order_repository import OrderRepository
+from app.src.repositories.user_repository import UserRepository
 
 # Declare Element =================================================================================================
 
@@ -41,6 +42,7 @@ class OrderService(metaclass=Singleton):
         """"""
         self.__order_repository = OrderRepository()
         self.__config_repository = ConfigRepository()
+        self.__user_repository = UserRepository()
 
     def create(self, order: OrderCreateDTO, image: UploadFile, username: str):
         folder_data_path = './data'
@@ -72,6 +74,7 @@ class OrderService(metaclass=Singleton):
         _timestamp_now = TimeHelper.get_timestamp_now(level=MILISECOND)
         _order_code = f"{_timestamp_now}"
 
+        _order_entity.status="1"
         _order_entity.image_order = id_image
         _order_entity.code = _order_code
         _order_entity.created_by = username
@@ -85,7 +88,8 @@ class OrderService(metaclass=Singleton):
         return _res
     
 
-    def get(self, params: OrderGetDTO):
+    def get(self, params: OrderGetDTO, user):
+
         _search = params.search
 
         _sort = Sorting(
@@ -93,10 +97,23 @@ class OrderService(metaclass=Singleton):
             sort=params.sort
         )
 
-        _filter = Filtering(
-            time_from=params.time_from,
-            time_to=params.time_to
-        )
+        if user == "admin":
+            _filter = Filtering(
+                time_from=params.time_from,
+                time_to=params.time_to,
+                data={
+                    "status": params.status
+                }
+            )
+        else:
+            _filter = Filtering(
+                time_from=params.time_from,
+                time_to=params.time_to,
+                data={
+                    "status": params.status,
+                    "created_by": user
+                }
+            )
 
         _pagination = Pagination(
             page=params.page,
@@ -112,6 +129,7 @@ class OrderService(metaclass=Singleton):
 
         if _result:
             _config_entity = self.__config_repository.get_latest()
+            _user_entity = self.__user_repository.get_detail_by_user(user=user)
 
             for _order_entity in _result:
                 _order_entity.exchange_rate = _config_entity.exchange_rate
@@ -124,10 +142,14 @@ class OrderService(metaclass=Singleton):
                 
                 _order_fee_percent = 0
                 for _option in _config_entity.purchase_fee:
-                    if _total_vn_price:
-                        if _total_vn_price > _option.min and _total_vn_price <= _option.max:
+
+                        if _option.min == 0 and _total_vn_price == 0:
                             _order_fee_percent = _option.value
                             break
+                        else:
+                            if _total_vn_price > _option.min and _total_vn_price <= _option.max:
+                                _order_fee_percent = _option.value
+                                break
 
                 _weight_fee = 0
                 for _option in _config_entity.weight:
@@ -136,6 +158,9 @@ class OrderService(metaclass=Singleton):
                             _weight_fee = _option.value
                             break
 
+                _order_entity.total_fee = _total_vn_price
+                _order_entity.user_storage = _user_entity.storage
+                _order_entity.exchange_rate = _config_entity.exchange_rate
                 _order_entity.order_fee_percent = _order_fee_percent
                 _order_entity.weight_rate = _weight_fee
                 _order_entity.weight_fee = _weight_fee*(_order_entity.weight if _order_entity.weight else 0)
@@ -157,8 +182,9 @@ class OrderService(metaclass=Singleton):
         return _result, _pagination, _sort
     
 
-    def get_detail(self, order_id: str):
+    def get_detail(self, order_id: str, user=""):
         _order_entity = self.__order_repository.get_detail(order_id=order_id)
+        _user_entity = self.__user_repository.get_detail_by_user(user=user)
         _config_entity = self.__config_repository.get_latest()
 
         _order_entity.exchange_rate = _config_entity.exchange_rate
@@ -171,10 +197,14 @@ class OrderService(metaclass=Singleton):
         
         _order_fee_percent = 0
         for _option in _config_entity.purchase_fee:
-            if _total_vn_price:
-                if _total_vn_price > _option.min and _total_vn_price <= _option.max:
+
+                if _option.min == 0 and _total_vn_price == 0:
                     _order_fee_percent = _option.value
                     break
+                else:
+                    if _total_vn_price > _option.min and _total_vn_price <= _option.max:
+                        _order_fee_percent = _option.value
+                        break
 
         _weight_fee = 0
         for _option in _config_entity.weight:
@@ -183,6 +213,9 @@ class OrderService(metaclass=Singleton):
                     _weight_fee = _option.value
                     break
 
+        _order_entity.total_fee = _total_vn_price
+        _order_entity.user_storage = _user_entity.storage
+        _order_entity.exchange_rate = _config_entity.exchange_rate
         _order_entity.order_fee_percent = _order_fee_percent
         _order_entity.weight_rate = _weight_fee
         _order_entity.weight_fee = _weight_fee*(_order_entity.weight if _order_entity.weight else 0)
@@ -229,7 +262,7 @@ class OrderService(metaclass=Singleton):
 
         self.__order_repository.update(order_id=order_id, order_data=_order_entity)
 
-        _order_entity = self.get_detail(order_id=order_id)
+        _order_entity = self.get_detail(order_id=order_id, user=username)
         
         _order_dto = OrderDTO(
             **_order_entity.__dict__

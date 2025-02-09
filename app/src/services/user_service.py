@@ -150,6 +150,7 @@ class UserService(metaclass=Singleton):
             'province': getattr(_user_detail, 'province', ''),
             'district': getattr(_user_detail, 'district', ''),
             'address_detail': getattr(_user_detail, 'address_detail', ''),
+            'balance': getattr(_user_detail, 'balance', ''),
             'role': _user_detail.role,
             'iat': datetime.datetime.utcnow(),
             'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1)

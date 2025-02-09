@@ -87,11 +87,11 @@ async def get_detail(
 async def create(
     request: Request,
     data: UserCreateDTO = Body(...),
-    user = Depends(validate_user_token)
+    # user = Depends(validate_user_token)
 ):
-    if user != 'admin':
-        raise NotAllowedException(message='Người dùng này không có quyền.')
-
+    # if user != 'admin':
+    #     raise NotAllowedException(message='Người dùng này không có quyền.')
+    user = data.email
     _result = user_service.create(user=data, username=user)
 
     return ResponseSuccess(

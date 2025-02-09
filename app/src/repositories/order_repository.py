@@ -79,7 +79,7 @@ class OrderRepository(BaseRepository, metaclass=Singleton):
     def get(self, sort=Sorting(), filter=Filtering(), pagination=Pagination(), search: str=""):
         _condition = {
             "is_active": True,
-            **(filter.data),
+            **(filter.approximate_search()),
             "$or": [
                 {"code": self._approximate_search(search)}
             ]
@@ -122,9 +122,9 @@ class OrderRepository(BaseRepository, metaclass=Singleton):
     def count_document(self, filter=Filtering(), search: str=""):
         _condition = {
             "is_active": True,
-            **(filter.data),
+            **(filter.approximate_search()),
             "$or": [
-                {"decision_number": self._approximate_search(search)}
+                {"code": self._approximate_search(search)}
             ]
         }
 

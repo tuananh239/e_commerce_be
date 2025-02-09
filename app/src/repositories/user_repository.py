@@ -181,7 +181,7 @@ class UserRepository(BaseRepository, metaclass=Singleton):
                 "_id": ObjectId(user_id)
             },
             {
-                Syntax.SET: { "password": user_data.password }
+                Syntax.SET: jsonable_encoder(user_data, exclude_none=True)
             }
         )
 

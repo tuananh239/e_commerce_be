@@ -44,9 +44,9 @@ order_service = OrderService()
 async def get_list(
     request: Request,
     params: OrderGetDTO = Depends(),
-    # user = Depends(validate_user_token)
+    user = Depends(validate_user_token)
 ):
-    _result, _pagination, _sort = order_service.get(params=params)
+    _result, _pagination, _sort = order_service.get(params=params, user=user)
 
     return ResponseSuccess(
         path=request.url.path,
@@ -62,9 +62,9 @@ async def get_list(
 async def get_detail(
     request: Request,
     order_id: str = None,
-    # user = Depends(validate_user_token)
+    user = Depends(validate_user_token)
 ):
-    _result = order_service.get_detail(order_id=order_id)
+    _result = order_service.get_detail(order_id=order_id, user=user)
 
     return ResponseSuccess(
         path=request.url.path,
@@ -78,8 +78,7 @@ async def create(
     request: Request,
     data: OrderCreateDTO = Body(...),
     image: UploadFile = Depends(ValidationHelper.validate_image),
-    # user = Depends(validate_user_token)
-    user = "user"
+    user = Depends(validate_user_token)
 ):
 
     _result = order_service.create(order=data, image=image, username=user)
@@ -97,8 +96,7 @@ async def get_image_content(
     order_id: str = None,
     image_id: str = None,
     type_image: str = 'original',
-    # user = Depends(validate_user_token)
-    user = "user"
+    user = Depends(validate_user_token)
 ):
     folder_path = './data/order'
     
@@ -126,10 +124,9 @@ async def update(
     order_id: str = None,
     data: OrderUpdateDTO = Body(...),
     images: List[UploadFile] = Depends(ValidationHelper.validate_list_image),
-    # user = Depends(validate_user_token)
-    user="user"
+    user = Depends(validate_user_token)
 ):
-    order_service.get_detail(order_id=order_id)
+    order_service.get_detail(order_id=order_id, user=user)
 
     _result = order_service.update(order_id=order_id, order=data, images=images, username=user)
 
@@ -145,10 +142,9 @@ async def update(
 async def remove(
     request: Request,
     order_id: str = None,
-    # user = Depends(validate_user_token)
-    user="user"
+    user = Depends(validate_user_token)
 ):
-    order_service.get_detail(order_id=order_id)
+    order_service.get_detail(order_id=order_id, user=user)
 
     _result = order_service.remove(order_id=order_id)
 

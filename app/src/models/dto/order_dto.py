@@ -18,6 +18,7 @@ class OrderGetDTO(BaseModel):
     sort_by: Optional[str] = "_id"
     sort: Optional[str] = "asc"
     search: Optional[str] = ""
+    status: Optional[str] = ""
     time_from: Optional[int] = None
     time_to: Optional[int] = None
 
