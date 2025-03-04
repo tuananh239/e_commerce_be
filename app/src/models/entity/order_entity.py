@@ -9,6 +9,22 @@ class ProductEntity(BaseModel):
     number: Optional[int]
     price: Optional[float]
     note: Optional[str]
+    note_staff: Optional[str]
+
+
+class PackageEntity(BaseModel):
+    id: Optional[Any]
+    weight: Optional[float]
+    weight_rate: Optional[float]
+    total_weight_price: Optional[float]
+    ship_at: Optional[Any]
+    transit_at_vn: Optional[Any]
+    stock_at_vn: Optional[Any]
+    return_at: Optional[Any]
+    weight_base_volumn: Optional[float]
+    weight_base_volumn_rate: Optional[float]
+    total_weight_volumn_price: Optional[float]
+    status: Optional[Any]
 
 
 class OrderEntity(BaseModel):
@@ -17,6 +33,7 @@ class OrderEntity(BaseModel):
     image_order: Optional[str]
     type_delivery: Optional[str]
     products: Optional[List[ProductEntity]]
+    packages: Optional[List[PackageEntity]]
     note_owner: Optional[str]
     note_staff: Optional[str]
     order_fee_percent: Optional[float]
@@ -26,6 +43,7 @@ class OrderEntity(BaseModel):
     extra_fee: Optional[float]
     ship_cn_fee: Optional[float]
     tally_fee: Optional[float]
+    order_fee: Optional[float]
     item_total_cost: Optional[float]
     total_fee: Optional[float]
     total_paid: Optional[float]
@@ -44,6 +62,9 @@ class OrderEntity(BaseModel):
     weight: Optional[float]
     weight_base_volumn: Optional[float]
     weight_rate: Optional[float]
+
+    custom_percent_paid: Optional[float]
+    is_custom_percent_paid: Optional[bool]
 
     id: Optional[str]
     modified_by: Optional[str]

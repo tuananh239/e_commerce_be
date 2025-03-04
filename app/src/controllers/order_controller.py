@@ -20,7 +20,9 @@ from app.libs.helpers.aes_helper import AESHelper
 from app.libs.helpers.validation_helper import ValidationHelper
 from app.src.dependencies.auth_dependency import validate_user_token
 from app.src.models.dto.order_dto import OrderDTO, OrderCreateDTO, OrderUpdateDTO, OrderGetDTO
+from app.src.models.dto.user_dto import UserPaidDTO
 from app.src.services.order_service import OrderService
+from app.src.services.user_service import UserService
 
 # =================================================================================================================
 
@@ -36,6 +38,7 @@ order_controller = Controller(
 )
 
 order_service = OrderService()
+user_service = UserService()
 
 # Implement API ===================================================================================================
 # API Get ---------------------------------------------------------------------------------------------------------
@@ -129,6 +132,28 @@ async def update(
     order_service.get_detail(order_id=order_id, user=user)
 
     _result = order_service.update(order_id=order_id, order=data, images=images, username=user)
+
+    return ResponseSuccess(
+        path=request.url.path,
+        result=_result
+    )
+
+
+@order_router.put(path="/order/{order_id}/paid")
+@try_catch
+async def paid(
+    request: Request,
+    order_id: str = None,
+    user_paid: UserPaidDTO = Body(...),
+    user = Depends(validate_user_token)
+):
+    order_detail = order_service.get_detail(order_id=order_id, user=user)
+
+    user_service.paid(email=user, user_amount=user_paid.amount)
+
+    order_detail.total_paid = user_paid.amount
+
+    _result = order_service.update(order_id=order_id, order=order_detail, images=[], username=user)
 
     return ResponseSuccess(
         path=request.url.path,

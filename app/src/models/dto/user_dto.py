@@ -29,6 +29,14 @@ class UserLoginDTO(BaseModel):
     password: Optional[str]
 
 
+class UserRechargeDTO(BaseModel):
+    amount: Optional[float]
+
+
+class UserPaidDTO(BaseModel):
+    amount: Optional[float]
+
+
 class UserUpdateDTO(BaseModel):
     password: Optional[str]
     name: Optional[str]

@@ -133,6 +133,42 @@ class UserService(metaclass=Singleton):
         return True
     
 
+    def recharge(self, user_id, user_amount):
+        _user_entity = self.get_detail(user_id=user_id)
+        balance = 0
+        if not _user_entity.balance:
+            balance = user_amount
+        else:
+            balance = _user_entity.balance + user_amount
+        self.__user_repository.recharge(user_id=user_id, balance=balance)
+
+        _user_entity = self.get_detail(user_id=user_id)
+        
+        _user_dto = UserDTO(
+            **_user_entity.__dict__
+        )
+        
+        return _user_dto
+    
+
+    def paid(self, email, user_amount):
+        _user_entity = self.__user_repository.get_detail_by_user(user=email)
+        balance = 0
+        if not _user_entity.balance or _user_entity.balance < user_amount:
+            raise NotAllowedException(message='User balance is not enought to paid.')
+        else:
+            balance = _user_entity.balance - user_amount
+        self.__user_repository.recharge(user_id=_user_entity.id, balance=balance)
+
+        _user_entity = self.get_detail(user_id=_user_entity.id)
+        
+        _user_dto = UserDTO(
+            **_user_entity.__dict__
+        )
+        
+        return _user_dto
+    
+
     def login(self, user: UserDTO):
         _user_entity = UserEntity(**user.__dict__)
 

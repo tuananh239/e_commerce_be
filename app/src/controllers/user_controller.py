@@ -23,7 +23,7 @@ from app.libs.helpers.aes_helper import AESHelper
 from app.libs.helpers.validation_helper import ValidationHelper
 from app.src.commons.constants.constants import JWT_CONST
 from app.src.dependencies.auth_dependency import validate_user_token
-from app.src.models.dto.user_dto import UserCreateDTO, UserDTO, UserGetDTO, UserLoginDTO, UserUpdateDTO
+from app.src.models.dto.user_dto import UserCreateDTO, UserDTO, UserGetDTO, UserLoginDTO, UserRechargeDTO, UserUpdateDTO
 from app.src.services.user_service import UserService
 
 # =================================================================================================================
@@ -108,6 +108,22 @@ async def login(
     # user = Depends(validate_user_token)
 ):
     _result = user_service.login(data)
+
+    return ResponseSuccess(
+        path=request.url.path,
+        result=_result
+    )
+
+
+@user_router.post(path="/user/{user_id}/recharge")
+@try_catch
+async def recharge(
+    request: Request,
+    user_id: str = None,
+    user_recharge: UserRechargeDTO = Body(...),
+    user = Depends(validate_user_token)
+):
+    _result = user_service.recharge(user_id=user_id, user_amount=user_recharge.amount)
 
     return ResponseSuccess(
         path=request.url.path,

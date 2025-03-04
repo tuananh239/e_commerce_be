@@ -203,6 +203,21 @@ class UserRepository(BaseRepository, metaclass=Singleton):
         return True
     
 
+    def recharge(self, user_id: str, balance):
+        self.__collection.update_one(
+            {
+                "_id": ObjectId(user_id)
+            },
+            {
+                Syntax.SET: {
+                    "balance": balance
+                }
+            }
+        )
+
+        return True
+    
+
     def get_detail_by_user(self, user: str):
         _response = self.__collection.find_one({'email': user, "is_active": True})
 

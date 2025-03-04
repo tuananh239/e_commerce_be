@@ -97,7 +97,9 @@ class OrderService(metaclass=Singleton):
             sort=params.sort
         )
 
-        if user == "admin":
+        _user_detail = self.__user_repository.get_detail_by_user(user=user)
+
+        if _user_detail.role == "ADMIN":
             _filter = Filtering(
                 time_from=params.time_from,
                 time_to=params.time_to,
@@ -127,6 +129,7 @@ class OrderService(metaclass=Singleton):
             pagination=_pagination
         )
 
+        _result_dto = []
         if _result:
             _config_entity = self.__config_repository.get_latest()
             _user_entity = self.__user_repository.get_detail_by_user(user=user)
@@ -136,7 +139,7 @@ class OrderService(metaclass=Singleton):
 
                 _total_cn_price = 0
                 for _product in _order_entity.products:
-                    _total_cn_price = _total_cn_price + _product.price
+                    _total_cn_price = _total_cn_price + _product.price * _product.number
 
                 _total_vn_price = _total_cn_price*_config_entity.exchange_rate
                 
@@ -151,21 +154,66 @@ class OrderService(metaclass=Singleton):
                                 _order_fee_percent = _option.value
                                 break
 
-                _weight_fee = 0
-                for _option in _config_entity.weight:
-                    if _order_entity.weight:
-                        if _order_entity.weight > _option.min and _order_entity.weight <= _option.max:
-                            _weight_fee = _option.value
-                            break
+                _weight_total_fee = 0
+                _weight_base_volumn_total_fee = 0
+                _weight_rate = 0
+                _weight_base_volumn_rate = 0
+                if not _order_entity.packages:
+                    _order_entity.packages = []
+                for _package in _order_entity.packages:
+                    for _option in _config_entity.weight:
+                        if _package.weight:
+                            if _package.weight > _option.min and _package.weight <= _option.max:
+                                _weight_rate = _option.value
+                                break
 
-                _order_entity.total_fee = _total_vn_price
+                    _package.weight_rate = _weight_rate
+                    _package.total_weight_price = _weight_rate*(_package.weight if _package.weight else 0)
+
+                    _weight_total_fee = _weight_total_fee + _package.total_weight_price
+
+                    #
+                    for _option in _config_entity.weight:
+                        if _package.weight_base_volumn:
+                            if _package.weight_base_volumn > _option.min and _package.weight_base_volumn <= _option.max:
+                                _weight_base_volumn_rate = _option.value
+                                break
+
+                    _package.weight_base_volumn_rate = _weight_base_volumn_rate
+                    _package.total_weight_volumn_price = _weight_base_volumn_rate*(_package.weight_base_volumn if _package.weight_base_volumn else 0)
+
+                    _weight_base_volumn_total_fee = _weight_base_volumn_total_fee + _package.total_weight_volumn_price
+
+                _order_entity.weight_fee = _weight_total_fee
+                _order_entity.weight_base_volumn = _weight_base_volumn_total_fee
+
+                if _weight_total_fee >= _weight_base_volumn_total_fee:
+                    _order_entity.total_weight_fee = _weight_total_fee
+                    _order_entity.weight_rate = _weight_rate
+                else:
+                    _order_entity.total_weight_fee = _weight_base_volumn_total_fee
+                    _order_entity.weight_rate = _weight_base_volumn_rate
+
+                _order_entity.item_total_cost = _total_vn_price
+
+                _order_entity.total_fee = _total_vn_price \
+                    + _total_vn_price * _order_fee_percent \
+                    + (_order_entity.extra_fee if _order_entity.extra_fee != None else 0) \
+                    + (_order_entity.ship_cn_fee if _order_entity.ship_cn_fee != None else 0) \
+                    + (_order_entity.tally_fee if _order_entity.tally_fee != None else 0) \
+                    + (_order_entity.extra_ship_fee if _order_entity.extra_ship_fee != None else 0) \
+                    + (_order_entity.wood_package_fee if _order_entity.wood_package_fee != None else 0) \
+                    + (_order_entity.total_weight_fee if _order_entity.total_weight_fee != None else 0)
                 _order_entity.user_storage = _user_entity.storage
                 _order_entity.exchange_rate = _config_entity.exchange_rate
                 _order_entity.order_fee_percent = _order_fee_percent
-                _order_entity.weight_rate = _weight_fee
-                _order_entity.weight_fee = _weight_fee*(_order_entity.weight if _order_entity.weight else 0)
+                _order_entity.order_fee = _total_vn_price * _order_fee_percent
 
-            _result = [OrderDTO(**order.__dict__) for order in _result]
+            for order in _result:
+                _order_dto = OrderDTO(**order.__dict__)
+                _order_dto.email = _user_detail.email
+                _order_dto.phone_number = _user_detail.phone_number
+                _result_dto.append(_order_dto)
 
         _total_records = self.__order_repository.count_document(
             filter=_filter,
@@ -179,7 +227,7 @@ class OrderService(metaclass=Singleton):
             total_page=ceil(_total_records / _pagination.size) if _pagination.size > 0 else 1
         )
 
-        return _result, _pagination, _sort
+        return _result_dto, _pagination, _sort
     
 
     def get_detail(self, order_id: str, user=""):
