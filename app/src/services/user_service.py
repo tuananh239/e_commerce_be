@@ -114,6 +114,19 @@ class UserService(metaclass=Singleton):
         return _user_dto
     
 
+    def get_detail_by_user(self, user: str):
+        _user_entity = self.__user_repository.get_detail_by_user(user=user)
+
+        if _user_entity == None:
+            raise NotFoundException(message='Không tìm thấy người dùng \'{user}\'.')
+        
+        _user_dto = UserDTO(
+            **_user_entity.__dict__
+        )
+        
+        return _user_dto
+    
+
     def update(self, user_id: str, user: UserDTO):
         self.__user_repository.update(user_id=user_id, user_data=user)
 

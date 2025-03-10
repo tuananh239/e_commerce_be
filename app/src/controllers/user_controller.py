@@ -50,7 +50,8 @@ async def get_list(
     params: UserGetDTO = Depends(),
     user = Depends(validate_user_token)
 ):
-    if user != 'admin':
+    _user_detail = user_service.get_detail_by_user(user=user)
+    if _user_detail.role != "ADMIN":
         raise NotAllowedException(message='Người dùng này không có quyền.')
 
     _result, _pagination, _sort = user_service.get(params=params)
@@ -71,7 +72,8 @@ async def get_detail(
     user_id: str = None,
     user = Depends(validate_user_token)
 ):
-    if user != 'admin':
+    _user_detail = user_service.get_detail(user_id=user_id)
+    if _user_detail.role != "ADMIN" and _user_detail.email != user:
         raise NotAllowedException(message='Người dùng này không có quyền.')
 
     _result = user_service.get_detail(user_id=user_id)
@@ -123,6 +125,10 @@ async def recharge(
     user_recharge: UserRechargeDTO = Body(...),
     user = Depends(validate_user_token)
 ):
+    _user_detail = user_service.get_detail(user_id=user_id)
+    if _user_detail.role != "ADMIN":
+        raise NotAllowedException(message='Người dùng này không có quyền.')
+
     _result = user_service.recharge(user_id=user_id, user_amount=user_recharge.amount)
 
     return ResponseSuccess(
@@ -140,7 +146,8 @@ async def update(
     data: UserUpdateDTO = Body(...),
     user = Depends(validate_user_token)
 ):
-    if user != 'admin':
+    _user_detail = user_service.get_detail(user_id=user_id)
+    if _user_detail.role != "ADMIN" and _user_detail.email != user:
         raise NotAllowedException(message='Người dùng này không có quyền.')
 
     user_service.get_detail(user_id=user_id)
@@ -161,7 +168,8 @@ async def remove(
     user_id: str = None,
     user = Depends(validate_user_token)
 ):
-    if user != 'admin':
+    _user_detail = user_service.get_detail(user_id=user_id)
+    if _user_detail.role != "ADMIN":
         raise NotAllowedException(message='Người dùng này không có quyền.')
 
     user_service.get_detail(user_id=user_id)

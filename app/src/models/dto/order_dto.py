@@ -142,6 +142,11 @@ class OrderDTO(BaseModel):
 
     email: Optional[str]
     phone_number: Optional[str]
+    name: Optional[str]
+    storage: Optional[str]
+    province: Optional[str]
+    district: Optional[str]
+    address_detail: Optional[str]
 
     custom_percent_paid: Optional[float]
     is_custom_percent_paid: Optional[bool]
