@@ -152,6 +152,7 @@ async def paid(
     user_service.paid(email=user, user_amount=user_paid.amount)
 
     order_detail.total_paid = user_paid.amount
+    order_detail.status = 3
 
     _result = order_service.update(order_id=order_id, order=order_detail, images=[], username=user)
 
