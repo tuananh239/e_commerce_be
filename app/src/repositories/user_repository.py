@@ -59,7 +59,7 @@ class UserRepository(BaseRepository, metaclass=Singleton):
     """
     def __init__(self) -> None:
         self.__client = self._get_client(MONGODB_CONST.CONNECTION.SERVER)
-        self.__connection = self.__client.get_database("decision_manager")
+        self.__connection = self.__client.get_database("e_commerce")
         self.__collection = self.__connection.user
         self.__create_admin_user()
 
@@ -132,6 +132,7 @@ class UserRepository(BaseRepository, metaclass=Singleton):
 
     def count_document(self, filter=Filtering(), search: str=""):
         _condition = {
+            'email': {'$ne': 'admin'},
             "is_active": True,
             **(filter.data),
             "$or": [

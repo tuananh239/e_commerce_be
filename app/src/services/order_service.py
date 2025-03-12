@@ -132,9 +132,9 @@ class OrderService(metaclass=Singleton):
         _result_dto = []
         if _result:
             _config_entity = self.__config_repository.get_latest()
-            _user_entity = self.__user_repository.get_detail_by_user(user=user)
 
             for _order_entity in _result:
+                _user_entity = self.__user_repository.get_detail_by_user(user=_order_entity.created_by)
                 _order_entity.exchange_rate = _config_entity.exchange_rate
 
                 _total_cn_price = 0
@@ -204,22 +204,25 @@ class OrderService(metaclass=Singleton):
                     + (_order_entity.extra_ship_fee if _order_entity.extra_ship_fee != None else 0) \
                     + (_order_entity.wood_package_fee if _order_entity.wood_package_fee != None else 0) \
                     + (_order_entity.total_weight_fee if _order_entity.total_weight_fee != None else 0)
-                _order_entity.user_storage = _user_entity.storage
                 _order_entity.exchange_rate = _config_entity.exchange_rate
                 _order_entity.order_fee_percent = _order_fee_percent
                 _order_entity.order_fee = _total_vn_price * _order_fee_percent
 
-            for order in _result:
-                _order_dto = OrderDTO(**order.__dict__)
-                _order_dto.email = _user_detail.email
-                _order_dto.phone_number = _user_detail.phone_number
-                _order_dto.name = _user_detail.name
-                _order_dto.storage = _user_detail.storage
-                _order_dto.province = _user_detail.province
-                _order_dto.district = _user_detail.district
-                _order_dto.address_detail = _user_detail.address_detail
+                _order_dto = OrderDTO(**_order_entity.__dict__)
+                if _user_entity:
+                    _order_dto.email = _user_entity.email
+                    _order_dto.phone_number = _user_entity.phone_number
+                    _order_dto.name = _user_entity.name
+                    _order_dto.storage = _user_entity.storage
+                    _order_dto.province = _user_entity.province
+                    _order_dto.district = _user_entity.district
+                    _order_dto.address_detail = _user_entity.address_detail
+                    _order_dto.user_storage = _user_entity.storage
                 
                 _result_dto.append(_order_dto)
+
+            # for order in _result:
+                
 
         _total_records = self.__order_repository.count_document(
             filter=_filter,
@@ -238,7 +241,7 @@ class OrderService(metaclass=Singleton):
 
     def get_detail(self, order_id: str, user=""):
         _order_entity = self.__order_repository.get_detail(order_id=order_id)
-        _user_entity = self.__user_repository.get_detail_by_user(user=user)
+        _user_entity = self.__user_repository.get_detail_by_user(user=_order_entity.created_by)
         _config_entity = self.__config_repository.get_latest()
 
         _order_entity.exchange_rate = _config_entity.exchange_rate
@@ -310,7 +313,6 @@ class OrderService(metaclass=Singleton):
             + (_order_entity.extra_ship_fee if _order_entity.extra_ship_fee != None else 0) \
             + (_order_entity.wood_package_fee if _order_entity.wood_package_fee != None else 0) \
             + (_order_entity.total_weight_fee if _order_entity.total_weight_fee != None else 0)
-        _order_entity.user_storage = _user_entity.storage
         _order_entity.exchange_rate = _config_entity.exchange_rate
         _order_entity.order_fee_percent = _order_fee_percent
         _order_entity.order_fee = _total_vn_price * _order_fee_percent
@@ -323,13 +325,16 @@ class OrderService(metaclass=Singleton):
             **_order_entity.__dict__
         )
 
-        _order_dto.email = _user_entity.email
-        _order_dto.phone_number = _user_entity.phone_number
-        _order_dto.name = _user_entity.name
-        _order_dto.storage = _user_entity.storage
-        _order_dto.province = _user_entity.province
-        _order_dto.district = _user_entity.district
-        _order_dto.address_detail = _user_entity.address_detail
+        if _user_entity:
+            _order_dto.email = _user_entity.email
+            _order_dto.phone_number = _user_entity.phone_number
+            _order_dto.name = _user_entity.name
+            _order_dto.storage = _user_entity.storage
+            _order_dto.province = _user_entity.province
+            _order_dto.district = _user_entity.district
+            _order_dto.address_detail = _user_entity.address_detail
+            _order_dto.user_storage = _user_entity.storage
+
         
         return _order_dto
     
