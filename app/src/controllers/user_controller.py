@@ -127,7 +127,8 @@ async def recharge(
     user = Depends(validate_user_token)
 ):
     _user_detail = user_service.get_detail(user_id=user_id)
-    if _user_detail.role != "ADMIN":
+    _user_get = user_service.get_detail_by_user(user=user)
+    if _user_get.role != "ADMIN":
         raise NotAllowedException(message='Người dùng này không có quyền.')
 
     _result = user_service.recharge(user_id=user_id, user_amount=user_recharge.amount)
@@ -148,7 +149,8 @@ async def update(
     user = Depends(validate_user_token)
 ):
     _user_detail = user_service.get_detail(user_id=user_id)
-    if _user_detail.role != "ADMIN" and _user_detail.email != user:
+    _user_get = user_service.get_detail_by_user(user=user)
+    if _user_get.role != "ADMIN" and _user_detail.email != user:
         raise NotAllowedException(message='Người dùng này không có quyền.')
 
     user_service.get_detail(user_id=user_id)
@@ -170,7 +172,8 @@ async def remove(
     user = Depends(validate_user_token)
 ):
     _user_detail = user_service.get_detail(user_id=user_id)
-    if _user_detail.role != "ADMIN":
+    _user_get = user_service.get_detail_by_user(user=user)
+    if _user_get.role != "ADMIN":
         raise NotAllowedException(message='Người dùng này không có quyền.')
 
     user_service.get_detail(user_id=user_id)
