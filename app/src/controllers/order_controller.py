@@ -17,6 +17,7 @@ from app.libs.fastapi.decorator import try_catch
 from app.libs.fastapi.route import Controller, get_router
 from app.libs.fastapi.response import ResponseSuccess
 from app.libs.helpers.aes_helper import AESHelper
+from app.libs.helpers.time_helper import MILISECOND, TimeHelper
 from app.libs.helpers.validation_helper import ValidationHelper
 from app.src.dependencies.auth_dependency import validate_user_token
 from app.src.models.dto.order_dto import OrderDTO, OrderCreateDTO, OrderUpdateDTO, OrderGetDTO
@@ -153,6 +154,7 @@ async def paid(
 
     order_detail.total_paid = user_paid.amount
     order_detail.status = 3
+    order_detail.deposit_at = TimeHelper.get_timestamp_now(level=MILISECOND)
 
     _result = order_service.update(order_id=order_id, order=order_detail, images=[], username=user)
 
