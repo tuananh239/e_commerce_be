@@ -40,7 +40,7 @@ config_service = ConfigService()
 
 # Implement API ===================================================================================================
 # API Get ---------------------------------------------------------------------------------------------------------
-@config_router.get(path="/config/")
+@config_router.get(path="/config")
 @try_catch
 async def get_list(
     request: Request,
@@ -94,7 +94,7 @@ async def get_detail(
     )
 
 # API Create ------------------------------------------------------------------------------------------------------
-@config_router.post(path="/config/")
+@config_router.post(path="/config")
 @try_catch
 async def create(
     request: Request,

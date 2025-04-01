@@ -43,7 +43,7 @@ user_service = UserService()
 
 # Implement API ===================================================================================================
 # API Get ---------------------------------------------------------------------------------------------------------
-@user_router.get(path="/user/")
+@user_router.get(path="/user")
 @try_catch
 async def get_list(
     request: Request,
@@ -85,7 +85,7 @@ async def get_detail(
     )
 
 # API Create ------------------------------------------------------------------------------------------------------
-@user_router.post(path="/user/")
+@user_router.post(path="/user")
 @try_catch
 async def create(
     request: Request,
