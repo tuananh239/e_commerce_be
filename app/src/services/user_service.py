@@ -202,7 +202,7 @@ class UserService(metaclass=Singleton):
             'balance': getattr(_user_detail, 'balance', ''),
             'role': _user_detail.role,
             'iat': datetime.datetime.utcnow(),
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=2)
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=20)
         }
 
         from cryptography.hazmat.backends import default_backend

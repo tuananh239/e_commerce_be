@@ -21,9 +21,10 @@ from app.libs.helpers.time_helper import MILISECOND, TimeHelper
 from app.libs.helpers.validation_helper import ValidationHelper
 from app.src.dependencies.auth_dependency import validate_user_token
 from app.src.models.dto.cart_dto import CartDTO, CartUpdateDTO
-from app.src.models.dto.order_dto import ProductDTO
+from app.src.models.dto.order_dto import OrderCreateDTO, ProductDTO
 from app.src.models.dto.user_dto import UserPaidDTO
 from app.src.services.cart_service import CartService
+from app.src.services.order_service import OrderService
 from app.src.services.user_service import UserService
 
 # =================================================================================================================
@@ -41,6 +42,7 @@ cart_controller = Controller(
 
 cart_service = CartService()
 user_service = UserService()
+order_service = OrderService()
 
 # Implement API ===================================================================================================
 # API Get ---------------------------------------------------------------------------------------------------------
@@ -68,6 +70,28 @@ async def create(
 ):
 
     _result = cart_service.add_product(product=data, username=user)
+
+    return ResponseSuccess(
+        path=request.url.path,
+        result=_result
+    )
+
+
+@cart_router.post(path="/cart/create-order")
+@try_catch
+async def create(
+    request: Request,
+    type_delivery: str,
+    user = Depends(validate_user_token)
+):
+
+    _result = cart_service.get(username=user)
+    _order_data = OrderCreateDTO(
+        products=_result.products,
+        type_delivery=type_delivery
+    )
+    _result_order = order_service.create(order=_order_data, image=None, username=user)
+    _result = cart_service.remove(cart_id=_result.id)
 
     return ResponseSuccess(
         path=request.url.path,
