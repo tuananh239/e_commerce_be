@@ -2,6 +2,7 @@ from typing import Any, List, Optional
 from pydantic import BaseModel
 
 class ProductEntity(BaseModel):
+    name: Optional[str]
     link_product: Optional[str]
     link_product_image: Optional[str]
     color: Optional[str]

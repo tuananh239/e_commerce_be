@@ -191,7 +191,7 @@ class UserService(metaclass=Singleton):
             raise AuthorizationException()
 
         _payload = {
-            'sub': 'user_id',
+            'sub': _user_detail.id,
             'email': getattr(_user_detail, 'email', ''),
             'name': getattr(_user_detail, 'name', ''),
             'phone_number': getattr(_user_detail, 'phone_number', ''),
@@ -202,7 +202,7 @@ class UserService(metaclass=Singleton):
             'balance': getattr(_user_detail, 'balance', ''),
             'role': _user_detail.role,
             'iat': datetime.datetime.utcnow(),
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=2)
         }
 
         from cryptography.hazmat.backends import default_backend

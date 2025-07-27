@@ -109,6 +109,7 @@ from app.src.commons.constants.constants import APP_CONST
 from app.src.controllers.user_controller import user_controller
 from app.src.controllers.config_controller import config_controller
 from app.src.controllers.order_controller import order_controller
+from app.src.controllers.cart_controller import cart_controller
 
 # ===========================================================================================
 
@@ -128,7 +129,8 @@ app.add_middleware(
 controllers = [
     order_controller,
     user_controller,
-    config_controller
+    config_controller,
+    cart_controller
 ]
 
 add_router(
