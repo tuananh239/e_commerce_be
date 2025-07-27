@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "1688 Toolbar Extension",
+  "version": "1.0",
+  "description": "Thêm toolbar cho trang 1688.com",
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon.png",
+      "48": "icon.png",
+      "128": "icon.png"
+    }
+  },
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://detail.1688.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://detail.1688.com/*"],
+      "css": ["content.css"],
+      "js": ["content.js"]
+    }
+  ],
+  "icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  }
+} 
